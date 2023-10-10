@@ -1,6 +1,6 @@
 module.exports = {
   jwt: {
-    secret: 'helloWorld',
+    secret: process.env.AUTH_SECRET ?? 'DEFAULT',
     expiresIn: '30d',
   },
 }
