@@ -1,64 +1,49 @@
-const knex = require('../database/knex')
-const AppError = require('../utils/AppError')
+const ProductRepository = require("../repositories/ProductRepository")
+const ProductCreateService = require("../services/ProductCreateService")
+const ProductUpdateService = require("../services/ProductUpdateService")
+const ProductIndexService = require("../services/ProductIndexService")
+const IngredientRepository = require("../repositories/IngredientRepository")
+
 
 class ProductsController {
   async create(request, response) {
   
     const { title, description, category, price, ingredients } = request.body
 
-    const [product_id] = await knex('products').insert({
+    const productRepository = new ProductRepository()
+    const ingredientRepository = new IngredientRepository()
+    const productCreateService = new ProductCreateService(productRepository, ingredientRepository)
+
+    const productId  = await productCreateService.execute({
       title,
       description,
       category,
       price,
+      ingredients
     })
 
-    const ingredientsFilter = ingredients.map((ingredient) => {
-      return {
-        product_id: product_id,
-        name: ingredient,
-      }
+    return response.json({
+      productId
     })
-
-    await knex('ingredients').insert(ingredientsFilter)
-
-    if(!product_id){
-      throw new AppError("Não foi possível criar esse produto!!")
-    }
-
-
-    return response.json(product_id)
   }
 
   async update(request, response) {
     const { id } = request.params
     const { title, description, category, price, ingredients } = request.body
 
-    const product = await knex('products').where({ id }).first()
+    const productRepository = new ProductRepository()
+    const ingredientRepository = new IngredientRepository()
+    const productUpdateService = new ProductUpdateService(productRepository, ingredientRepository)
 
-    if (!product) {
-      throw new AppError('O produto procurado não existe!!')
-    }
 
-    product.title = title ?? product.title
-    product.description = description ?? product.description
-    product.category = category ?? product.category
-    product.price = price ?? product.price
-    product.updated_at = knex.fn.now()
-
-    if (ingredients) {
-      const ingredientsInNewArray = ingredients.map(ingredient => {
-
-        return {
-          name: ingredient.trim(),
-          product_id: product.id
-        }
-      })
-
-      await knex("ingredients").insert(ingredientsInNewArray)
-    }
-    
-    await knex('products').update(product).where({ id })
+    await productUpdateService.execute({
+      id,
+      title,
+      description,
+      category,
+      price,
+      ingredients
+    })
 
     return response.json()
   }
@@ -66,7 +51,9 @@ class ProductsController {
   async delete(request, response) {
     const { id } = request.params
 
-    await knex('products').where({ id }).delete()
+    const productRepository = new ProductRepository()
+
+    await productRepository.delete(id)
 
     return response.json()
   }
@@ -74,11 +61,15 @@ class ProductsController {
   async show(request, response) {
     const { id } = request.params
 
-    const products = await knex('products').where({ id }).first()
-    const ingredients = await knex('ingredients').where({ product_id: id })
+    const ingredientRepository = new IngredientRepository()
+    const productRepository = new ProductRepository()
+
+
+    const product = await productRepository.findProductById(id)
+    const ingredients = await ingredientRepository.findIngredientsByProductId(id)
 
     return response.json({
-      ...products,
+      ...product,
       ingredients,
     })
   }
@@ -86,42 +77,13 @@ class ProductsController {
   async index(request, response) {
     const { query } = request.query
 
-    let products 
-    
-    if (query) {
-      products = await knex('ingredients')
-        .select(
-          [
-            'products.id',
-            'products.title', 
-            'products.description', 
-            'products.category' ,
-            'products.picture', 
-            'products.price',
-          ])
-        .whereLike('products.title', `%${query}%`)
-        .orWhereLike('ingredients.name', `%${query}%`)
-        .innerJoin('products', 'products.id', 'ingredients.product_id')
-        .groupBy("products.id")
-        .orderBy("products.title")
-    }  else {
-      products = await knex("products").select("*")
-    }
+    const productRepository = new ProductRepository()
+    const ingredientRepository = new IngredientRepository()
+    const productIndexService = new ProductIndexService(productRepository, ingredientRepository)
 
-    const ingredientsQuery = await knex('ingredients')
+    const products = await productIndexService.execute(query)
 
-    const productsWithIngredients = products.map((product) => {
-      const ingredientsFilter = ingredientsQuery.filter(
-        (ingredients) => product.id === ingredients.product_id,
-      )
-
-      return {
-        ...product,
-        ingredients: ingredientsFilter,
-      }
-    })
-
-    return response.json(productsWithIngredients)
+    return response.json(products)
   }
 }
 
