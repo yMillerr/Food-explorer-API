@@ -30,7 +30,12 @@ class SessionCreateService {
     })
 
     return {
-      user,
+      user:{
+        id: user.id,
+        admin: user.admin,
+        name: user.name,
+        email: user.email
+      },
       token
     }
   }
