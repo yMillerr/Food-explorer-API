@@ -14,6 +14,12 @@ class UserRepository {
       password
     })
 
+    if (Number(userId) === 1) {
+      await knex("users").update({
+        admin: true
+      }).where({ id: userId})
+    }
+
     return { id: userId }
   }
 }
