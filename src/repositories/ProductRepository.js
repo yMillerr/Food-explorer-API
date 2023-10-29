@@ -52,8 +52,8 @@ class ProductRepository  {
     return products
   }
 
-  async fecthAllProducts(){
-    const products = await knex("products").select("*").groupBy("title")
+  async fetchAllProducts(){
+    const products = await knex("products").select("*")
 
     return products
   }

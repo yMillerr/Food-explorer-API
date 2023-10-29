@@ -11,7 +11,7 @@ class ProductIndexService {
     if (query) {
       products = await this.productRepository.queryProducts(query)
     }  else {
-      products = await this.productRepository.fecthAllProducts()
+      products = await this.productRepository.fetchAllProducts()
     }
 
     const ingredientsQuery = await this.ingredientRepository.fetchAllIngredients()
