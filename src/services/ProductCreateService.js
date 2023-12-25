@@ -20,7 +20,7 @@ class ProductCreateService {
       ingredientsFilter = ingredients.map((ingredient) => {
         return {
           product_id: productId,
-          name: ingredient,
+          name: ingredient?.name ?? ingredient,
         }
       })
     }

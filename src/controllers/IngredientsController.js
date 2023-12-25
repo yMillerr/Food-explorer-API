@@ -16,7 +16,7 @@ class IngredientsController {
 
     const ingredientsRepository = new IngredientsRepository()
 
-    const ingredients = await ingredientsRepository.findIngredientByProductId(product_id)
+    const ingredients = await ingredientsRepository.findIngredientsByProductId(product_id)
 
     return response.json(ingredients)
   }

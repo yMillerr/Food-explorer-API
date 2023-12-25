@@ -24,9 +24,8 @@ class ProductUpdateService {
   
     if (ingredients) {
       const ingredientsInNewArray = ingredients.map(ingredient => {
-  
         return {
-          name: ingredient.trim(),
+          name: ingredient?.trim(),
           product_id: product.id
         }
       })

@@ -4,13 +4,9 @@ const uploadConfig = require("../configs/upload")
 
 class DiskStorage {
   constructor(){
-    try {
       if(!fs.existsSync(uploadConfig.UPLOAD_FOLDER)){
-        fs.promises.mkdir(uploadConfig.UPLOAD_FOLDER)
+        fs.promises.mkdir(uploadConfig.UPLOAD_FOLDER).catch((error) => console.error(error)).finally()
       }
-    } catch (error) {
-      return console.log(error)
-    }
   }
   
   async saveFile(file){

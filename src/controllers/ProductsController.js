@@ -22,9 +22,7 @@ class ProductsController {
       ingredients
     })
 
-    return response.json({
-      productId
-    })
+    return response.json({ ...productId })
   }
 
   async update(request, response) {
