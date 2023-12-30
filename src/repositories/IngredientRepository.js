@@ -20,7 +20,6 @@ class IngredientRepository {
   }
 
   async create(ingredients) {
-    console.log(ingredients)
     await knex('ingredients').insert(ingredients)
   }
 }

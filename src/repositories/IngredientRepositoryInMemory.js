@@ -32,7 +32,7 @@ class IngredientRepositoryInMemory {
     return product_id[0]
   }
 
-  fecthAllIngredients(){
+  fetchAllIngredients(){
     return this.ingredients
   }
 
